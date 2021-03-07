@@ -299,7 +299,7 @@ export default {
         this.$message.success("更新用户信息成功");
       });
     },
-    removeUserById(id) {
+    async removeUserById(id) {
       const confirmResult = await this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
