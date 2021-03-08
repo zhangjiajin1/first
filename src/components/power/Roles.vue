@@ -132,6 +132,28 @@
         <el-button type="primary" @click="editUserInfo">确 定</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog
+      title="分配权限"
+      :visible.sync="setRightDialogVisible"
+      width="50%"
+      @close="setRightDialogClosed"
+    >
+      <el-tree
+        ref="treeRef"
+        :default-checked-keys="defKeys"
+        :data="rightsList"
+        :props="treeProps"
+        show-checkbox
+        node-key="id"
+        default-expand-all
+      ></el-tree>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="allotRights">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -152,6 +174,12 @@ export default {
         roleName: "",
         roleDesc: "",
       },
+      treeProps: {
+        label: "authName",
+        children: "children",
+      },
+      defKeys: [],
+      roleId: "",
     };
   },
   created() {
@@ -224,7 +252,7 @@ export default {
       this.$message.success("删除用户成功");
       this.getRoleList();
     },
-    async removeRightById(role,rightId) {
+    async removeRightById(role, rightId) {
       const confirmResult = await this.$confirm(
         "此操作将永久删除该文件, 是否继续?",
         "提示",
@@ -237,11 +265,49 @@ export default {
       if (confirmResult !== "confirm") {
         return this.$message.info("已取消删除");
       }
-      const { data: res } = await this.$http.delete(`roles/${role.id}/rights/${rightId}`);
+      const { data: res } = await this.$http.delete(
+        `roles/${role.id}/rights/${rightId}`
+      );
       if (res.meta.status !== 200) {
         return this.$message.error("删除权限失败");
       }
-      role.children = res.data
+      role.children = res.data;
+    },
+    async showSetRightDialog(role) {
+      this.roleId = role.id;
+      const { data: res } = await this.$http.get("rights/tree");
+      if (res.meta.status !== 200) {
+        return this.$message.error("获取数据失败");
+      }
+      this.rightsList = res.data;
+      this.getLeafKeys(role, this.defKeys);
+      this.setRightDialogVisible = true;
+    },
+    getLeafKeys(node, arr) {
+      if (!node.children) {
+        return arr.push(node.id);
+      }
+      node.children.forEach((item) => this.getLeafKeys(item, arr));
+    },
+    setRightDialogClosed() {
+      this.defKeys = [];
+    },
+    async allotRights() {
+      const keys = [
+        ...this.$refs.treeRef.getCheckedKeys(),
+        ...this.$refs.treeRef.getHalfCheckedKeys(),
+      ];
+      const idStr = keys.join(",");
+      const { data: res } = await this.$http.post(
+        `roles/${this.roleId}/rights`,
+        { rids: idStr }
+      );
+      if (res.meta.status !== 200) {
+        return this.$message.error("分配权限失败");
+      }
+      this.$message.success("分配权限成功");
+      this.getRoleList();
+      this.setRightDialogVisible = false;
     },
   },
 };
