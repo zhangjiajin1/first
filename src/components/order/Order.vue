@@ -100,7 +100,7 @@
     </el-dialog>
 
     <el-dialog title="物流进度" :visible.sync="progressVisible" width="50%">
-      <!-- <el-timeline>
+      <el-timeline>
         <el-timeline-item
           v-for="(activity, index) in progressInfo"
           :key="index"
@@ -108,7 +108,7 @@
         >
           {{ activity.context }}
         </el-timeline-item>
-      </el-timeline> -->
+      </el-timeline>
     </el-dialog>
   </div>
 </template>
@@ -174,11 +174,11 @@ export default {
       this.$refs.addressFormRef.resetFields();
     },
     async showProgressBox() {
-    //   const { data: res } = await this.$http.get("/kuaidi/804909574412544580");
-    //   if (res.meta.status !== 200) {
-    //     return this.$message.error("获取物流进度失败！");
-    //   }
-    //   this.progressInfo = res.data;
+      const { data: res } = await this.$http.get("/kuaidi/804909574412544580");
+      if (res.meta.status !== 200) {
+        return this.$message.error("获取物流进度失败！");
+      }
+      this.progressInfo = res.data;
       this.progressVisible = true;
     },
   },

@@ -13,6 +13,9 @@ import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.bubble.css'
 
+import echarts from 'echarts'
+Vue.prototype.$echarts = echarts
+
 import axios from 'axios'
 axios.defaults.baseURL = 'http://timemeetyou.com:8889/api/private/v1/'
 axios.interceptors.request.use(config =>{
